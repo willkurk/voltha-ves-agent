@@ -1,0 +1,46 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <logger name="org.apache.kafka" level="INFO"/>
+    <logger name="org.apache.kafka.common.metrics" level="INFO"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+      <file> /opt/ves-agent/log-${byDay}.txt </file>
+      <append>true</append>
+      <encoder>
+         <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+      </encoder>
+      <filter class="filter.MarkerFilter">
+        <marker>DATA</marker>
+        <onMatch>DENY</onMatch>
+      </filter>
+   </appender>
+
+   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+      <file> /opt/ves-agent/data-${byDay}.txt </file>
+      <append>true</append>
+      <filter class="filter.MarkerFilter">
+        <marker>DATA</marker>
+        <onMismatch>DENY</onMismatch>
+      </filter>
+      <filter class="filter.MarkerFilter">
+	<marker>DATA</marker>
+	<onMatch>ACCEPT</onMatch>
+      </filter>
+      <encoder>
+         <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+      </encoder>
+   </appender>
+
+   <root level="debug">
+      <appender-ref ref="FILE" />
+      <appender-ref ref="STDOUT" />
+   </root>
+
+</configuration>
