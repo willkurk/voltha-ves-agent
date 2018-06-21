@@ -10,19 +10,15 @@
     <logger name="org.apache.kafka" level="INFO"/>
     <logger name="org.apache.kafka.common.metrics" level="INFO"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <appender name="FILE_MAIN" class="ch.qos.logback.core.FileAppender">
       <file> /opt/ves-agent/log-${byDay}.txt </file>
       <append>true</append>
       <encoder>
          <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
       </encoder>
-      <filter class="filter.MarkerFilter">
-        <marker>DATA</marker>
-        <onMismatch>ACCEPT</onMismatch>
-      </filter>
    </appender>
 
-   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+   <appender name="FILE_DATA" class="ch.qos.logback.core.FileAppender">
       <file> /opt/ves-agent/data-${byDay}.txt </file>
       <append>true</append>
       <filter class="filter.MarkerFilter">
@@ -39,7 +35,8 @@
    </appender>
 
    <root level="debug">
-      <appender-ref ref="FILE" />
+      <appender-ref ref="FILE_MAIN" />
+      <appender-ref ref="FILE_DATA" />
       <appender-ref ref="STDOUT" />
    </root>
 
