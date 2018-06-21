@@ -54,6 +54,7 @@
                                 <repository>${docker.image.prefix}/${project.artifactId}</repository>
                                 <buildArgs>
                                         <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+					<PROPERTIES_FILE>config/config.properties</PROPERTIES_FILE>
                                 </buildArgs>
                         </configuration>
                 </plugin>

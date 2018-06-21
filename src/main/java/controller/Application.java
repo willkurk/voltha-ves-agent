@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.InterruptedException;
 
+import config.Config;
+
+
 @SpringBootApplication
 @RestController
 public class Application {
@@ -21,17 +24,19 @@ public class Application {
     }
 
     public static void main(String[] args) {
-	KafkaThread kafka = new KafkaThread();
+        Config.loadProperties("/opt/ves-agent/config.properties");
+	      KafkaThread kafka = new KafkaThread();
         kafka.start();
         SpringApplication.run(Application.class, args);
     }
 
 }
 class KafkaThread extends Thread {
-   
+
     private final static Logger logger = LoggerFactory.getLogger("KafkaThread");
 
     public void run() {
+      logger.debug("Start Kafka Consumer Thread");
        try {
        	  VolthaKafkaConsumer.runConsumer();
        } catch (InterruptedException e) {

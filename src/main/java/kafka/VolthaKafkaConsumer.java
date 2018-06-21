@@ -12,12 +12,13 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 import ves.*;
+import config.Config;
 
 public class VolthaKafkaConsumer {
 
-    private final static String TOPIC = "voltha.alarms";
-    private final static String BOOTSTRAP_SERVERS =
-            "kafka.voltha.svc.cluster.local:9092";
+//    private final static String TOPIC = "voltha.alarms";
+//    private final static String BOOTSTRAP_SERVERS =
+//            "kafka.voltha.svc.cluster.local:9092";
 
     private final static Logger logger = LoggerFactory.getLogger("VolthaKafkaConsumer");
     private static String dataMarkerText = "DATA";
@@ -26,9 +27,11 @@ public class VolthaKafkaConsumer {
     private static KafkaConsumer<Long, String> createConsumer() {
       logger.debug("Creating Kafka Consumer");
 
+
+      String kafkaAddress = Config.getKafkaAddress() + ":" + Config.getKafkaPort();
       final Properties props = new Properties();
       props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                                  BOOTSTRAP_SERVERS);
+                                  kafkaAddress);
       props.put(ConsumerConfig.GROUP_ID_CONFIG,
                                   "KafkaExampleConsumer");
       props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
@@ -41,7 +44,7 @@ public class VolthaKafkaConsumer {
                                   new KafkaConsumer<>(props);
 
       // Subscribe to the topic.
-      consumer.subscribe(Collections.singletonList(TOPIC));
+      consumer.subscribe(Collections.singletonList(Config.getKafkaTopic()));
       return consumer;
   }
 

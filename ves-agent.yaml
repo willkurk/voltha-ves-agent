@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: voltha
-          image: localhost:5000/ves-agent
+          image: docker-repo.dev.atl.foundry.att.com:5000/voltha-ves-agent:1
           env:
             - name: POD_IP
               valueFrom:
@@ -39,11 +39,6 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
           
-       #      - "/bin/sh"
-       #      - "-ecx"
-       #      - |
-       #       sleep 1000
-
           ports:
             - containerPort: 8080
               name: rest-port
