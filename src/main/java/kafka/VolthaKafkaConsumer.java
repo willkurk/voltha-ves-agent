@@ -20,11 +20,22 @@ public class VolthaKafkaConsumer {
 //    private final static String BOOTSTRAP_SERVERS =
 //            "kafka.voltha.svc.cluster.local:9092";
 
-    private final static Logger logger = LoggerFactory.getLogger("VolthaKafkaConsumer");
-    private static String dataMarkerText = "DATA";
-    private static Marker dataMarker = MarkerFactory.getMarker(dataMarkerText);
+    private final Logger logger = LoggerFactory.getLogger("VolthaKafkaConsumer");
+    private final String dataMarkerText = "DATA";
+    private final Marker dataMarker = MarkerFactory.getMarker(dataMarkerText);
 
-    private static KafkaConsumer<Long, String> createConsumer() {
+    private KafkaConsumer<Long, String> kafkaConsumer;
+
+    public void VolthaKafkaConsumer() {
+      initVesAgent();
+      kafkaConsumer = createConsumer();
+    }
+
+    private void initVesAgent() {
+      VesAgent.initVes();
+    }
+
+    private KafkaConsumer<Long, String> createConsumer() {
       logger.debug("Creating Kafka Consumer");
 
 
@@ -48,7 +59,7 @@ public class VolthaKafkaConsumer {
       return consumer;
   }
 
-  public static void runConsumer() throws InterruptedException {
+  public void runConsumer() throws InterruptedException {
         final KafkaConsumer<Long, String> consumer = createConsumer();
 
 	logger.debug("Starting Consumer");
@@ -61,7 +72,22 @@ public class VolthaKafkaConsumer {
                 logger.info(dataMarker, "Consumer Record:({}, {}, {}, {})\n",
                         record.key(), record.value(),
                         record.partition(), record.offset());
-                VesAgent.sendToVES("");
+                logger.info("Attempting to send data to VES");
+                boolean success = false;
+                while (!success) {
+                  success = VesAgent.sendToVES("");
+                  if (!success) {
+                    logger.info("Ves message failed. Sleeping for 15 seconds.");
+                    try {
+                      Thread.sleep(15000);
+                    } catch (InterruptedException e) {
+                      logger.info(e.getMessage());
+                    }
+                  } else {
+                    logger.info("Sent Ves Message");
+                  }
+                }
+
             });
 
             consumer.commitAsync();

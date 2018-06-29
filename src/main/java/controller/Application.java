@@ -38,7 +38,8 @@ class KafkaThread extends Thread {
     public void run() {
       logger.debug("Start Kafka Consumer Thread");
        try {
-       	  VolthaKafkaConsumer.runConsumer();
+         VolthaKafkaConsumer consumer = new VolthaKafkaConsumer();
+       	 consumer.runConsumer();
        } catch (InterruptedException e) {
           logger.error(e.getMessage());
        }
