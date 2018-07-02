@@ -42,7 +42,7 @@
       </encoder>
    </appender>
 
-   <root level="debug">
+   <root level="trace">
       <appender-ref ref="FILE_MAIN" />
       <appender-ref ref="FILE_DATA" />
       <appender-ref ref="STDOUT" />

@@ -24,11 +24,12 @@ public class VolthaKafkaConsumer {
     private final String dataMarkerText = "DATA";
     private final Marker dataMarker = MarkerFactory.getMarker(dataMarkerText);
 
-    private KafkaConsumer<Long, String> kafkaConsumer;
+    private KafkaConsumer<Long, String> consumer;
 
-    public void VolthaKafkaConsumer() {
+    public VolthaKafkaConsumer() {
+      logger.debug("VolthaKafkaConsumer constructor called");
       initVesAgent();
-      kafkaConsumer = createConsumer();
+      consumer = createConsumer();
     }
 
     private void initVesAgent() {
@@ -60,7 +61,6 @@ public class VolthaKafkaConsumer {
   }
 
   public void runConsumer() throws InterruptedException {
-        final KafkaConsumer<Long, String> consumer = createConsumer();
 
 	logger.debug("Starting Consumer");
 

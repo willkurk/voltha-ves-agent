@@ -25,6 +25,7 @@ public class VesAgent {
   private static final Logger logger = LoggerFactory.getLogger("VesAgent");
 
   public static void initVes() {
+    logger.info("Initializing VES Agent");
     try {
         AgentMain.evel_initialize("http://"+Config.getVesAddress(),
                 Integer.parseInt(Config.getVesPort()),
@@ -35,7 +36,7 @@ public class VesAgent {
                 "pill",
                 null, null, null,
                 //"/home/gokul/newwk/demo/vnfs/VES5.0/evel/sslcerts2/my-keystore.jks", "changeit", "changeit",
-                Level.INFO);
+                Level.TRACE);
     } catch( Exception e ) {
         e.printStackTrace();
     }
