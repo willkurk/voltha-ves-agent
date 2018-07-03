@@ -50,7 +50,7 @@ public class VesAgent {
             EVEL_SEVERITIES.EVEL_SEVERITY_MAJOR,
             EVEL_SOURCE_TYPES.EVEL_SOURCE_CARD,
             EVEL_VF_STATUSES.EVEL_VF_STATUS_ACTIVE);
-    //flt.evel_fault_addl_info_add("nichw", "fail");
+    flt.evel_fault_addl_info_add("voltha", json);
     //flt.evel_fault_addl_info_add("nicsw", "fail");
     flt.evel_fault_category_set("Communication");
     logger.info("Sending fault event");

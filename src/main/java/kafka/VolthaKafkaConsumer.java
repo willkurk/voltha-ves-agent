@@ -75,7 +75,7 @@ public class VolthaKafkaConsumer {
                 logger.info("Attempting to send data to VES");
                 boolean success = false;
                 while (!success) {
-                  success = VesAgent.sendToVES("");
+                  success = VesAgent.sendToVES(record.value());
                   if (!success) {
                     logger.info("Ves message failed. Sleeping for 15 seconds.");
                     try {
