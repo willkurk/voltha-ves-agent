@@ -42,6 +42,8 @@
       </encoder>
    </appender>
 
+   <logger name="org.springframework" level="WARNING"/>
+
    <root level="debug">
       <appender-ref ref="FILE_MAIN" />
       <appender-ref ref="FILE_DATA" />
