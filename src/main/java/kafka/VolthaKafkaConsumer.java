@@ -44,7 +44,12 @@ public class VolthaKafkaConsumer {
     public VolthaKafkaConsumer() {
       logger.debug("VolthaKafkaConsumer constructor called");
       initVesAgent();
-      consumer = createConsumer();
+      try {
+         consumer = createConsumer();
+      } catch (KafkaException e) {
+         logger.error("Error with Kafka connection. Retrying in 15 seconds.");
+         //Don't try to resolve it here. Try again in the thread loo, in case this is a temporal issue
+      }
     }
 
     private void initVesAgent() {
@@ -83,10 +88,13 @@ public class VolthaKafkaConsumer {
       while (true) {
 	  ConsumerRecords<Long, String> consumerRecords;
  	  try {
-	  	consumerRecords = consumer.poll(100000);
+		if (consumer == null) {
+			this.consumer = createConsumer();
+		}
+	  	consumerRecords = consumer.poll(1000);
 	  } catch (KafkaException e) {
-		logger.debug("Error with Kafka connection. Retrying in 15 seconds.");
-		this.consumer = createConsumer();
+		logger.error("Error with Kafka connection. Retrying in 15 seconds.");
+		consumer = null;
 		TimeUnit.SECONDS.sleep(15);
 		continue;
 	  }
