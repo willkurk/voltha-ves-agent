@@ -1,18 +1,18 @@
 /*
- * Copyright 2018- Cisco
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2018- Cisco
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 package ves;
 
 import evel_javalibrary.att.com.*;
@@ -37,12 +37,12 @@ import org.slf4j.LoggerFactory;
 
 public class VesAgent {
 
-  private static final Logger logger = LoggerFactory.getLogger("VesAgent");
+    private static final Logger logger = LoggerFactory.getLogger("VesAgent");
 
-  public static void initVes() {
-    logger.info("Initializing VES Agent");
-    try {
-        AgentMain.evel_initialize("http://"+Config.getVesAddress(),
+    public static void initVes() {
+        logger.info("Initializing VES Agent");
+        try {
+            AgentMain.evel_initialize("http://"+Config.getVesAddress(),
                 Integer.parseInt(Config.getVesPort()),
                 //  "http://1.2.3.4", 8080,
                 //"/vendor_event_listener","/example_vnf",
@@ -52,31 +52,33 @@ public class VesAgent {
                 null, null, null,
                 //"/home/gokul/newwk/demo/vnfs/VES5.0/evel/sslcerts2/my-keystore.jks", "changeit", "changeit",
                 Level.TRACE);
-    } catch( Exception e ) {
-        e.printStackTrace();
+        } catch( Exception e ) {
+            e.printStackTrace();
+        }
     }
-  }
 
-  public static boolean sendToVES(String json) {
-
-    EvelFault flt  = new EvelFault("Fault_VOLTHA_failed", "tbd_event_key_unique_to_source",
-            "NIC error", "Hardware failed",
+    public static boolean sendToVES(String json) {
+        EvelFault flt  = new EvelFault(
+            "Fault_VOLTHA_failed",
+            "tbd_event_key_unique_to_source",
+            "NIC error",
+            "Hardware failed",
             EvelHeader.PRIORITIES.EVEL_PRIORITY_HIGH,
             EVEL_SEVERITIES.EVEL_SEVERITY_MAJOR,
             EVEL_SOURCE_TYPES.EVEL_SOURCE_CARD,
             EVEL_VF_STATUSES.EVEL_VF_STATUS_ACTIVE);
-    flt.evel_fault_addl_info_add("voltha", json);
-    //flt.evel_fault_addl_info_add("nicsw", "fail");
-    flt.evel_fault_category_set("Communication");
-    logger.info("Sending fault event");
-    int code = AgentMain.evel_post_event_immediate(flt);
-    logger.info("Fault event http code received: " + code);
-    if(code == 0 || code >= HttpURLConnection.HTTP_BAD_REQUEST )
-    {
-      return false;
-    } else {
-      return true;
+        flt.evel_fault_addl_info_add("voltha", json);
+        //flt.evel_fault_addl_info_add("nicsw", "fail");
+        flt.evel_fault_category_set("Communication");
+        logger.info("Sending fault event");
+        int code = AgentMain.evel_post_event_immediate(flt);
+        logger.info("Fault event http code received: " + code);
+        if(code == 0 || code >= HttpURLConnection.HTTP_BAD_REQUEST )
+        {
+            return false;
+        } else {
+            return true;
+        }
     }
-  }
 
 }
