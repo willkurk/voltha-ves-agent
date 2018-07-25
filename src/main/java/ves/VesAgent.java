@@ -58,11 +58,12 @@ public class VesAgent {
     }
 
     public static boolean sendToVES(String json) {
+
         EvelFault flt  = new EvelFault(
-            "Fault_VOLTHA_failed",
-            "tbd_event_key_unique_to_source",
-            "NIC error",
-            "Hardware failed",
+            "Fault_VOLTHA_$(json.id)",
+            "json.logical_device_id:json.raised_ts",
+            "json.id",
+            "json.description",
             EvelHeader.PRIORITIES.EVEL_PRIORITY_HIGH,
             EVEL_SEVERITIES.EVEL_SEVERITY_MAJOR,
             EVEL_SOURCE_TYPES.EVEL_SOURCE_CARD,
