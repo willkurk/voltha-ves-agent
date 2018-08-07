@@ -13,20 +13,24 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package config;
+package mapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class VesVolthaMapper {
 
     private final Logger logger = LoggerFactory.getLogger("VesVolthaMapper");
 
-    public VesVolthaMapper(String json) {
-        parseJson(json);
+    private Gson gson;
+
+    public VesVolthaMapper() {
+        gson = new GsonBuilder().create();
     }
 
-    private void parseJson(String json) {
-
+    public VesVolthaMessage parseJson(String json) {
+        return gson.fromJson(json, VesVolthaMessage.class);
     }
 }

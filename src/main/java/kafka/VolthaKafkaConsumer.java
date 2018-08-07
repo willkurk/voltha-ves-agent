@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import ves.*;
 import config.Config;
+import com.google.gson.JsonSyntaxException;
 
 public class VolthaKafkaConsumer {
 
@@ -117,6 +118,8 @@ public class VolthaKafkaConsumer {
             } catch (HTTPException e) {
                 logger.info("Ves message failed. Going back to polling.");
                 commit = false;
+            } catch (JsonSyntaxException e) {
+                logger.error("Json Syntax Exception: ", e);
             }
             if (commit) {
                 consumer.commitAsync();

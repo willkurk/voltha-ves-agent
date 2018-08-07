@@ -32,16 +32,23 @@ import java.net.HttpURLConnection;
 import org.apache.log4j.Level;
 import config.Config;
 
+import mapper.VesVolthaMapper;
+import mapper.VesVolthaMessage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.gson.JsonSyntaxException;
 
 public class VesAgent {
 
     private static final Logger logger = LoggerFactory.getLogger("VesAgent");
 
+    private static VesVolthaMapper mapper;
+
     public static void initVes() {
         logger.info("Initializing VES Agent");
         try {
+            mapper = new VesVolthaMapper();
             AgentMain.evel_initialize("http://"+Config.getVesAddress(),
                 Integer.parseInt(Config.getVesPort()),
                 //  "http://1.2.3.4", 8080,
@@ -57,20 +64,28 @@ public class VesAgent {
         }
     }
 
-    public static boolean sendToVES(String json) {
-
+    public static boolean sendToVES(String json) throws JsonSyntaxException {
+        VesVolthaMessage message = mapper.parseJson(json);
+        String id = message.getId();
+        String ldeviceId = message.getLogicalDeviceId();
+        String ts = message.getRaisedTS();
+        String description = message.getDescription();
+        //Type in Voltha needs to be category in VES
+        String category = message.getType();
+        String severity = message.getSeverity();
+        EVEL_SEVERITIES vesSeverity = mapSeverity(severity);
         EvelFault flt  = new EvelFault(
-            "Fault_VOLTHA_$(json.id)",
-            "json.logical_device_id:json.raised_ts",
-            "json.id",
-            "json.description",
+            "Fault_VOLTHA_" + id,
+            ldeviceId + ":" + ts,
+            id,
+            description,
             EvelHeader.PRIORITIES.EVEL_PRIORITY_HIGH,
             EVEL_SEVERITIES.EVEL_SEVERITY_MAJOR,
             EVEL_SOURCE_TYPES.EVEL_SOURCE_CARD,
             EVEL_VF_STATUSES.EVEL_VF_STATUS_ACTIVE);
         flt.evel_fault_addl_info_add("voltha", json);
         //flt.evel_fault_addl_info_add("nicsw", "fail");
-        flt.evel_fault_category_set("Communication");
+        flt.evel_fault_category_set(category);
         logger.info("Sending fault event");
         int code = AgentMain.evel_post_event_immediate(flt);
         logger.info("Fault event http code received: " + code);
@@ -82,4 +97,17 @@ public class VesAgent {
         }
     }
 
+    private EVEL_SEVERITIES mapSeverity(String severity) {
+        String severityUpper = severity.toUpperCase();
+        switch (severityUpper) {
+            case "INDETERMINATE":
+                return EVEL_SEVERITIES.EVEL_SEVERITY_NORMAL;
+            default:
+                return EVEL_SEVERITIES.valueOf("EVEL_SEVERITY_" + severityUpper)
+        }
+    }
+
+    private EVEL_SOURCE_TYPES mapType(String type) {
+        return EVEL_SEVERITIES.valueOf("EVEL_SOURCe_" + type.toUpperCase());
+    }
 }
