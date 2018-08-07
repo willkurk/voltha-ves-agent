@@ -72,16 +72,19 @@ public class VesAgent {
         String description = message.getDescription();
         //Type in Voltha needs to be category in VES
         String category = message.getType();
+        //Category in VOLTHA needs to be type in VES
+        String type = message.getCategory();
         String severity = message.getSeverity();
         EVEL_SEVERITIES vesSeverity = mapSeverity(severity);
+        EVEL_SOURCE_TYPES vesType = mapType(type);
         EvelFault flt  = new EvelFault(
             "Fault_VOLTHA_" + id,
             ldeviceId + ":" + ts,
             id,
             description,
             EvelHeader.PRIORITIES.EVEL_PRIORITY_HIGH,
-            EVEL_SEVERITIES.EVEL_SEVERITY_MAJOR,
-            EVEL_SOURCE_TYPES.EVEL_SOURCE_CARD,
+            vesSeverity,
+            vesType,
             EVEL_VF_STATUSES.EVEL_VF_STATUS_ACTIVE);
         flt.evel_fault_addl_info_add("voltha", json);
         //flt.evel_fault_addl_info_add("nicsw", "fail");
