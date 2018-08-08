@@ -26,13 +26,18 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import java.time.Instant;
+import java.time.Duration;
+
+import com.google.gson.JsonSyntaxException;
+
 import javax.xml.ws.http.HTTPException;
 
 import java.util.concurrent.TimeUnit;
 
 import ves.*;
 import config.Config;
-import com.google.gson.JsonSyntaxException;
+
 
 public class VolthaKafkaConsumer {
 
@@ -92,7 +97,7 @@ public class VolthaKafkaConsumer {
                 if (consumer == null) {
                     this.consumer = createConsumer();
                 }
-                consumerRecords = consumer.poll(1000);
+                consumerRecords = consumer.poll(20000);
             } catch (KafkaException e) {
                 logger.error("Error with Kafka connection. Retrying in 15 seconds.");
                 consumer = null;
@@ -104,6 +109,7 @@ public class VolthaKafkaConsumer {
             boolean commit = true;
             try {
                 consumerRecords.forEach(record -> {
+                    Instant start = Instant.now();
                     logger.info(dataMarker, "Consumer Record:({}, {}, {}, {})\n",
                     record.key(), record.value(),
                     record.partition(), record.offset());
@@ -112,7 +118,8 @@ public class VolthaKafkaConsumer {
                     if (!success) {
                         throw new HTTPException(0);
                     } else {
-                        logger.info("Sent Ves Message");
+                        Instant finish = Instant.now();
+                        logger.info("Sent Ves Message. Took " + Duration.between(start, finish).toMillis() + " Milliseconds.");
                     }
                 });
             } catch (HTTPException e) {

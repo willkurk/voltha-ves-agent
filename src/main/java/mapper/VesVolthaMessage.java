@@ -17,6 +17,7 @@ package mapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Map;
 
 public class VesVolthaMessage {
     private String id = "";
@@ -26,6 +27,9 @@ public class VesVolthaMessage {
     private String type = "";
     private String category = "";
     private String severity = "";
+    private String state = "";
+    private String resource_id = "";
+    private Map<String,String> context;
 
     public String getId() {
         return id;
@@ -51,5 +55,22 @@ public class VesVolthaMessage {
     public String getType() {
         return type;
     }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public Map<String,String> getContext() {
+        return context;
+    }
+
+    public String getResourceId() {
+        return resource_id;
+    }
+
 
 }

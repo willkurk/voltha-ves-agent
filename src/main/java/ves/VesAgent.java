@@ -75,6 +75,9 @@ public class VesAgent {
         //Category in VOLTHA needs to be type in VES
         String type = message.getCategory();
         String severity = message.getSeverity();
+        String state = message.getState();
+        String resourceId = message.getResourceId();
+        
         EVEL_SEVERITIES vesSeverity = mapSeverity(severity);
         EVEL_SOURCE_TYPES vesType = mapType(type);
         EvelFault flt  = new EvelFault(
@@ -87,30 +90,31 @@ public class VesAgent {
             vesType,
             EVEL_VF_STATUSES.EVEL_VF_STATUS_ACTIVE);
         flt.evel_fault_addl_info_add("voltha", json);
-        //flt.evel_fault_addl_info_add("nicsw", "fail");
+        flt.evel_fault_addl_info_add("state", state);
+        flt.evel_fault_addl_info_add("resourceId", resourceId);
         flt.evel_fault_category_set(category);
+
         logger.info("Sending fault event");
         int code = AgentMain.evel_post_event_immediate(flt);
         logger.info("Fault event http code received: " + code);
-        if(code == 0 || code >= HttpURLConnection.HTTP_BAD_REQUEST )
-        {
+        if(code == 0 || code >= HttpURLConnection.HTTP_BAD_REQUEST ) {
             return false;
         } else {
             return true;
         }
     }
 
-    private EVEL_SEVERITIES mapSeverity(String severity) {
+    private static EVEL_SEVERITIES mapSeverity(String severity) {
         String severityUpper = severity.toUpperCase();
         switch (severityUpper) {
             case "INDETERMINATE":
                 return EVEL_SEVERITIES.EVEL_SEVERITY_NORMAL;
             default:
-                return EVEL_SEVERITIES.valueOf("EVEL_SEVERITY_" + severityUpper)
+                return EVEL_SEVERITIES.valueOf("EVEL_SEVERITY_" + severityUpper);
         }
     }
 
-    private EVEL_SOURCE_TYPES mapType(String type) {
-        return EVEL_SEVERITIES.valueOf("EVEL_SOURCe_" + type.toUpperCase());
+    private static EVEL_SOURCE_TYPES mapType(String type) {
+        return EVEL_SOURCE_TYPES.valueOf("EVEL_SOURCE_" + type.toUpperCase());
     }
 }
