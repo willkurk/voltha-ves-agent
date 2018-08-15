@@ -65,4 +65,12 @@ public class Config {
     public static String getKafkaTopic() {
         return get("kafka_topic");
     }
+
+    public static String getCoId() {
+        return get("co_id");
+    }
+
+    public static String getPodId() {
+        return get("pod_id");
+    }
 }

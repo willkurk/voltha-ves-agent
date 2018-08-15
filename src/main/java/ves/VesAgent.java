@@ -51,7 +51,6 @@ public class VesAgent {
             mapper = new VesVolthaMapper();
             AgentMain.evel_initialize("http://"+Config.getVesAddress(),
                 Integer.parseInt(Config.getVesPort()),
-                //  "http://1.2.3.4", 8080,
                 //"/vendor_event_listener","/example_vnf",
                 null,null,
                 "will",
@@ -77,7 +76,7 @@ public class VesAgent {
         String severity = message.getSeverity();
         String state = message.getState();
         String resourceId = message.getResourceId();
-        
+
         EVEL_SEVERITIES vesSeverity = mapSeverity(severity);
         EVEL_SOURCE_TYPES vesType = mapType(type);
         EvelFault flt  = new EvelFault(
@@ -91,6 +90,8 @@ public class VesAgent {
             EVEL_VF_STATUSES.EVEL_VF_STATUS_ACTIVE);
         flt.evel_fault_addl_info_add("voltha", json);
         flt.evel_fault_addl_info_add("state", state);
+        flt.evel_fault_addl_info_add("co_id", Config.getCoId());
+        flt.evel_fault_addl_info_add("pod_id", Config.getPodId());
         flt.evel_fault_addl_info_add("resourceId", resourceId);
         flt.evel_fault_category_set(category);
 
