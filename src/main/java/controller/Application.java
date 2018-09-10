@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import kafka.VolthaKafkaConsumer;
+import kafka.KafkaConsumerType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,23 +41,40 @@ public class Application {
 
     public static void main(String[] args) {
         Config.loadProperties("/opt/ves-agent/config.properties");
-        KafkaThread kafka = new KafkaThread();
-        kafka.start();
-        SpringApplication.run(Application.class, args);
+        KafkaAlarmsThread kafkaAlarms = new KafkaAlarmsThread();
+        kafkaAlarms.start();
+        KafkaKpisThread kafkaKpis = new KafkaKpisThread();
+        kafkaKpis.start();
+        //SpringApplication.run(Application.class, args);
     }
 
 }
-class KafkaThread extends Thread {
+class KafkaAlarmsThread extends Thread {
 
-    private final static Logger logger = LoggerFactory.getLogger("KafkaThread");
+    private final static Logger logger = LoggerFactory.getLogger("KafkaAlarmsThread");
 
     public void run() {
-        logger.debug("Start Kafka Consumer Thread");
+        logger.debug("Start Kafka Alarms Consumer Thread");
         try {
-            VolthaKafkaConsumer consumer = new VolthaKafkaConsumer();
+            VolthaKafkaConsumer consumer = new VolthaKafkaConsumer(KafkaConsumerType.ALARMS);
             consumer.runConsumer();
-        } catch (InterruptedException e) {
-            logger.error(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error in Kafka Alarm thread", e);
+        }
+
+    }
+}
+class KafkaKpisThread extends Thread {
+
+    private final static Logger logger = LoggerFactory.getLogger("KafkaKpisThread");
+
+    public void run() {
+        logger.debug("Start Kafka KPIs Consumer Thread");
+        try {
+            VolthaKafkaConsumer consumer = new VolthaKafkaConsumer(KafkaConsumerType.KPIS);
+            consumer.runConsumer();
+        } catch (Exception e) {
+            logger.error("Error Kafka, KPI thread", e);
         }
 
     }

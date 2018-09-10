@@ -33,7 +33,9 @@ import org.apache.log4j.Level;
 import config.Config;
 
 import mapper.VesVolthaMapper;
-import mapper.VesVolthaMessage;
+import mapper.VesVolthaAlarm;
+import mapper.VesVolthaKpi;
+import kafka.KafkaConsumerType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +65,31 @@ public class VesAgent {
         }
     }
 
-    public static boolean sendToVES(String json) throws JsonSyntaxException {
-        VesVolthaMessage message = mapper.parseJson(json);
+    public static boolean sendToVES(KafkaConsumerType type, String json) throws JsonSyntaxException {
+        int code = 0;
+
+        switch (type) {
+            case ALARMS:
+                code = sendFault(json);
+                break;
+            case KPIS:
+                code = sendKpi(json);
+                break;
+        }
+
+        if(code == 0 || code >= HttpURLConnection.HTTP_BAD_REQUEST ) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private static int sendFault(String json) {
+        VesVolthaAlarm message = mapper.parseAlarm(json);
+
         String id = message.getId();
+        String[] idsplit = id.split("\\.");
+        String eventType = idsplit[idsplit.length-1];
         String ldeviceId = message.getLogicalDeviceId();
         String ts = message.getRaisedTS();
         String description = message.getDescription();
@@ -80,7 +104,7 @@ public class VesAgent {
         EVEL_SEVERITIES vesSeverity = mapSeverity(severity);
         EVEL_SOURCE_TYPES vesType = mapType(type);
         EvelFault flt  = new EvelFault(
-            "Fault_VOLTHA_" + id,
+            "Fault_VOLTHA_" + eventType,
             ldeviceId + ":" + ts,
             id,
             description,
@@ -98,11 +122,25 @@ public class VesAgent {
         logger.info("Sending fault event");
         int code = AgentMain.evel_post_event_immediate(flt);
         logger.info("Fault event http code received: " + code);
-        if(code == 0 || code >= HttpURLConnection.HTTP_BAD_REQUEST ) {
-            return false;
-        } else {
-            return true;
-        }
+        return code;
+    }
+
+    private static int sendKpi(String json) {
+        VesVolthaKpi message = mapper.parseKpi(json);
+
+        EvelOther ev = new EvelOther("measurement_VOLTHA_KPI", "vmname_ip");
+        ev.evel_other_field_add("co_id", Config.getCoId());
+        ev.evel_other_field_add("pod_id", Config.getPodId());
+        ev.evel_other_field_add("type", message.getType());
+        ev.evel_other_field_add("ts", message.getTs());
+        ev.evel_other_field_add("slices", message.getSliceData());
+
+        ev.evel_other_field_add("voltha", json);
+
+        logger.info("Sending fault event");
+        int code = AgentMain.evel_post_event_immediate(ev);
+        logger.info("Fault event http code received: " + code);
+        return code;
     }
 
     private static EVEL_SEVERITIES mapSeverity(String severity) {

@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;
 
-public class VesVolthaMessage {
+public class VesVolthaAlarm {
     private String id = "";
     private String logical_device_id = "";
     private String raised_ts = "";

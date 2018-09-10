@@ -62,8 +62,12 @@ public class Config {
         return get("kafka_port");
     }
 
-    public static String getKafkaTopic() {
-        return get("kafka_topic");
+    public static String getKafkaAlarmsTopic() {
+        return get("kafka_alarms_topic");
+    }
+
+    public static String getKafkaKpisTopic() {
+        return get("kafka_kpis_topic");
     }
 
     public static String getCoId() {

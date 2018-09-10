@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 public class VesVolthaMapper {
 
@@ -30,7 +31,17 @@ public class VesVolthaMapper {
         gson = new GsonBuilder().create();
     }
 
-    public VesVolthaMessage parseJson(String json) {
-        return gson.fromJson(json, VesVolthaMessage.class);
+    public VesVolthaAlarm parseAlarm(String json) {
+        return gson.fromJson(json, VesVolthaAlarm.class);
+    }
+
+    public VesVolthaKpi parseKpi(String json) {
+        //return gson.fromJson(json, VesVolthaKpi.class);
+        JsonObject body = gson.fromJson(json, JsonObject.class);
+        VesVolthaKpi kpi = new VesVolthaKpi();
+        kpi.setType(body.get("type").getAsString());
+        kpi.setTs(body.get("ts").getAsString());
+        kpi.setSliceData(body.get("slice_data").toString());
+        return kpi;
     }
 }
