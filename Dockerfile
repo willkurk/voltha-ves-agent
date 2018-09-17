@@ -1,13 +1,12 @@
-FROM ubuntu:16.04
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y openjdk-8-jdk curl less kafkacat && \
-    apt-get clean
+FROM maven:3-jdk-8 as maven
+COPY . /mavenwd
+WORKDIR /mavenwd/
+RUN mvn install:install-file -Dfile=/mavenwd/libs/evel_javalib2-1.1.0.jar
+RUN mvn -f /mavenwd/pom.xml clean package
 
-RUN mkdir /opt/ves-agent && chmod 777 -R /opt/ves-agent
+FROM openjdk:8-jre-alpine
+RUN mkdir -p /opt/ves-agent && chmod 777 -R /opt/ves-agent
 VOLUME /tmp
-ARG JAR_FILE
-ARG PROPERTIES_FILE
-COPY ${PROPERTIES_FILE} /opt/ves-agent/config.properties
-COPY ${JAR_FILE} app.jar
+COPY --from=maven /mavenwd/config/config.properties /opt/ves-agent/config.properties
+COPY --from=maven /mavenwd/target/ves-agent-0.1.0.jar app.jar
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
