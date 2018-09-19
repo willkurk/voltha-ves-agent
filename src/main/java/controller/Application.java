@@ -60,6 +60,7 @@ class KafkaAlarmsThread extends Thread {
             consumer.runConsumer();
         } catch (Exception e) {
             logger.error("Error in Kafka Alarm thread", e);
+            logger.error(e.toString());
         }
 
     }
@@ -74,7 +75,8 @@ class KafkaKpisThread extends Thread {
             VolthaKafkaConsumer consumer = new VolthaKafkaConsumer(KafkaConsumerType.KPIS);
             consumer.runConsumer();
         } catch (Exception e) {
-            logger.error("Error Kafka, KPI thread", e);
+            logger.error("Error in Kafka KPI thread", e);
+            logger.error(e.toString());
         }
 
     }

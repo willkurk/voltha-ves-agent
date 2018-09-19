@@ -102,7 +102,7 @@ public class VesAgent {
         String resourceId = message.getResourceId();
 
         EVEL_SEVERITIES vesSeverity = mapSeverity(severity);
-        EVEL_SOURCE_TYPES vesType = mapType(type);
+        EVEL_SOURCE_TYPES vesType = getSourceType();
         EvelFault flt  = new EvelFault(
             "Fault_VOLTHA_" + eventType,
             ldeviceId + ":" + ts,
@@ -116,6 +116,7 @@ public class VesAgent {
         flt.evel_fault_addl_info_add("state", state);
         flt.evel_fault_addl_info_add("co_id", Config.getCoId());
         flt.evel_fault_addl_info_add("pod_id", Config.getPodId());
+        flt.evel_fault_addl_info_add("type", type);
         flt.evel_fault_addl_info_add("resourceId", resourceId);
         flt.evel_fault_category_set(category);
 
@@ -153,7 +154,7 @@ public class VesAgent {
         }
     }
 
-    private static EVEL_SOURCE_TYPES mapType(String type) {
-        return EVEL_SOURCE_TYPES.valueOf("EVEL_SOURCE_" + type.toUpperCase());
+    private static EVEL_SOURCE_TYPES getSourceType() {
+        return EVEL_SOURCE_TYPES.valueOf("EVEL_SOURCE_OLT");
     }
 }
