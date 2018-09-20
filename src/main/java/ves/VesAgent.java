@@ -41,31 +41,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.gson.JsonSyntaxException;
 
+import java.util.List;
+import java.util.ArrayList;
+
 public class VesAgent {
 
     private static final Logger logger = LoggerFactory.getLogger("VesAgent");
 
-    private static VesVolthaMapper mapper;
+    private VesVolthaMapper mapper;
 
-    public static void initVes() {
+    private VesDispatcher dispatcher;
+
+    public VesAgent() {
         logger.info("Initializing VES Agent");
         try {
             mapper = new VesVolthaMapper();
-            AgentMain.evel_initialize("http://"+Config.getVesAddress(),
-                Integer.parseInt(Config.getVesPort()),
-                //"/vendor_event_listener","/example_vnf",
-                null,null,
-                "will",
-                "pill",
-                null, null, null,
-                //"/home/gokul/newwk/demo/vnfs/VES5.0/evel/sslcerts2/my-keystore.jks", "changeit", "changeit",
-                Level.TRACE);
-        } catch( Exception e ) {
-            e.printStackTrace();
+            dispatcher = new VesDispatcher("http://"+Config.getVesAddress(),
+                Config.getVesPort());
+        } catch(Exception e) {
+            logger.error("Failed to initialize VES", e);
+            logger.error(e.toString());
         }
     }
 
-    public static boolean sendToVES(KafkaConsumerType type, String json) throws JsonSyntaxException {
+    public boolean sendToVES(KafkaConsumerType type, String json) throws JsonSyntaxException {
         int code = 0;
 
         switch (type) {
@@ -84,7 +83,7 @@ public class VesAgent {
         }
     }
 
-    private static int sendFault(String json) {
+    private int sendFault(String json) {
         VesVolthaAlarm message = mapper.parseAlarm(json);
 
         String id = message.getId();
@@ -101,32 +100,32 @@ public class VesAgent {
         String state = message.getState();
         String resourceId = message.getResourceId();
 
-        EVEL_SEVERITIES vesSeverity = mapSeverity(severity);
-        EVEL_SOURCE_TYPES vesType = getSourceType();
-        EvelFault flt  = new EvelFault(
-            "Fault_VOLTHA_" + eventType,
-            ldeviceId + ":" + ts,
-            id,
-            description,
-            EvelHeader.PRIORITIES.EVEL_PRIORITY_HIGH,
-            vesSeverity,
-            vesType,
-            EVEL_VF_STATUSES.EVEL_VF_STATUS_ACTIVE);
-        flt.evel_fault_addl_info_add("voltha", json);
-        flt.evel_fault_addl_info_add("state", state);
-        flt.evel_fault_addl_info_add("co_id", Config.getCoId());
-        flt.evel_fault_addl_info_add("pod_id", Config.getPodId());
-        flt.evel_fault_addl_info_add("type", type);
-        flt.evel_fault_addl_info_add("resourceId", resourceId);
-        flt.evel_fault_category_set(category);
+        EventHeader header = new EventHeader("fault", ldeviceId + ":" + ts,
+                                                "Fault_VOLTHA_" + eventType);
+        EventFault flt  = new EventFault(
+            id, //alarm conidition
+            severity, //event severity
+            category, //eventCategory
+            type, //source type
+            description, //specificProblem
+            "Active" //getVfStatus
+            );
+        flt.addAdditionalValues("voltha", json);
+        flt.addAdditionalValues("state", state);
+        flt.addAdditionalValues("co_id", Config.getCoId());
+        flt.addAdditionalValues("pod_id", Config.getPodId());
+        flt.addAdditionalValues("resourceId", resourceId);
 
         logger.info("Sending fault event");
-        int code = AgentMain.evel_post_event_immediate(flt);
+        List<VesBlock> blocks = new ArrayList<>();
+        blocks.add(header);
+        blocks.add(flt);
+        int code = dispatcher.sendEvent(blocks);
         logger.info("Fault event http code received: " + code);
         return code;
     }
 
-    private static int sendKpi(String json) {
+    private int sendKpi(String json) {
         VesVolthaKpi message = mapper.parseKpi(json);
 
         EvelOther ev = new EvelOther("measurement_VOLTHA_KPI", "vmname_ip");
@@ -144,7 +143,7 @@ public class VesAgent {
         return code;
     }
 
-    private static EVEL_SEVERITIES mapSeverity(String severity) {
+    private EVEL_SEVERITIES mapSeverity(String severity) {
         String severityUpper = severity.toUpperCase();
         switch (severityUpper) {
             case "INDETERMINATE":
@@ -154,7 +153,7 @@ public class VesAgent {
         }
     }
 
-    private static EVEL_SOURCE_TYPES getSourceType() {
+    private EVEL_SOURCE_TYPES getSourceType() {
         return EVEL_SOURCE_TYPES.valueOf("EVEL_SOURCE_OLT");
     }
 }

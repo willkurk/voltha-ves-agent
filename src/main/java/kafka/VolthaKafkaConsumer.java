@@ -49,10 +49,12 @@ public class VolthaKafkaConsumer {
 
     private KafkaConsumerType type;
 
+    private VesAgent vesAgent;
+
     public VolthaKafkaConsumer(KafkaConsumerType type) {
         logger.debug("VolthaKafkaConsumer constructor called");
-        initVesAgent();
         this.type = type;
+        vesAgent = new VesAgent();
         try {
             consumer = createConsumer();
         } catch (Exception e) {
@@ -60,10 +62,6 @@ public class VolthaKafkaConsumer {
             logger.error("Retrying in 15 seconds.");
             //Don't try to resolve it here. Try again in the thread loo, in case this is a temporal issue
         }
-    }
-
-    private void initVesAgent() {
-        VesAgent.initVes();
     }
 
     private KafkaConsumer<Long, String> createConsumer() {
@@ -124,7 +122,7 @@ public class VolthaKafkaConsumer {
                     record.key(), record.value(),
                     record.partition(), record.offset());
                     logger.info("Attempting to send data to VES");
-                    boolean success = VesAgent.sendToVES(type, record.value());
+                    boolean success = vesAgent.sendToVES(type, record.value());
                     if (!success) {
                         throw new HTTPException(0);
                     } else {
