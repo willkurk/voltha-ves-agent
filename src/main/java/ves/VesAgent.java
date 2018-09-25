@@ -17,7 +17,6 @@ package ves;
 
 import java.net.HttpURLConnection;
 
-import org.apache.log4j.Level;
 import config.Config;
 
 import mapper.VesVolthaMapper;
@@ -116,7 +115,7 @@ public class VesAgent {
     private int sendKpi(String json) {
         VesVolthaKpi message = mapper.parseKpi(json);
 
-        EventHeader header = new EventHeader("other", "AddUniqueId:" + message.getTs(),
+        EventHeader header = new EventHeader("other", System.currentTimeMillis() + ":" + message.getTs(),
                                                 "other_VOLTHA_KPI");
         EventKpi ev = new EventKpi();
         ev.addAdditionalValues("voltha", json);
