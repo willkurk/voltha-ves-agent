@@ -107,7 +107,7 @@ public class EventHeader implements VesBlock {
         this.sourceName = hostname;
     }
 
-    private final char[] hexArray = "0123456789ABCDEF".toCharArray();
+    private final transient char[] hexArray = "0123456789ABCDEF".toCharArray();
     private String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for ( int j = 0; j < bytes.length; j++ ) {

@@ -23,6 +23,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class VesDispatcher {
 
@@ -33,21 +42,50 @@ public class VesDispatcher {
 
     private Gson gson;
 
+    private CloseableHttpClient httpClient;
+
     public VesDispatcher(String url, String port) {
         this.url = url;
         this.port = port;
 
         gson = new GsonBuilder().create();
+
+        httpClient = HttpClients.createDefault();
     }
 
     public int sendEvent(List<VesBlock> blocks) {
         JsonObject root = new JsonObject();
+        JsonObject event = new JsonObject();
         for (VesBlock block : blocks) {
             JsonElement element = gson.toJsonTree(block);
-            root.add(block.getName(), element);
+            event.add(block.getName(), element);
+        }
+        root.add("event", event);
+        String json = root.toString();
+        System.out.println(json);
+        int code = 0;
+
+        try {
+            HttpPost httpPost = new HttpPost(url + ":" + port+ "/eventListener/v5");
+            StringEntity input = new StringEntity(json);
+            input.setContentType("application/json");
+            httpPost.setEntity(input);
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+
+            try {
+                System.out.println(response.getStatusLine());
+                code = response.getStatusLine().getStatusCode();
+            } finally {
+                response.close();
+            }
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Error during http post", e);
+            logger.error(e.toString());
+        } catch (IOException e) {
+            logger.error("Error during http post", e);
+            logger.error(e.toString());
         }
 
-        System.out.println(root.toString());
-        return 200;
+        return code;
     }
 }
