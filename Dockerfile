@@ -1,7 +1,6 @@
 FROM maven:3-jdk-8 as maven
 COPY . /mavenwd
 WORKDIR /mavenwd/
-RUN mvn install:install-file -Dfile=/mavenwd/libs/evel_javalib2-1.1.0.jar
 RUN mvn -f /mavenwd/pom.xml clean package
 
 FROM openjdk:8-jre-alpine

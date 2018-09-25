@@ -13,5 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-mvn install:install-file -Dfile=libs/evel_javalib2-1.1.0.jar
 mvn package
